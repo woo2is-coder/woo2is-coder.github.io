@@ -110,7 +110,6 @@
       transition: width 0.2s ease;
     }
 
-    /* 카드 + 가운데 속성 동그라미 */
     .choice-layout {
       display: grid;
       grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
@@ -126,7 +125,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       min-height: 220px;
     }
     .choice-label {
@@ -142,9 +141,9 @@
 
     .img-wrapper {
       width: 100%;
-      max-width: 220px;
+      max-width: 260px;
       aspect-ratio: 4 / 3;
-      border-radius: 14px;
+      border-radius: 16px;
       overflow: hidden;
       background: #e5e7eb;
       margin-bottom: 10px;
@@ -173,15 +172,26 @@
       color: #0ea5e9;
     }
 
-    /* 척도: 스크롤 없이 한 줄에 7개 */
-    .scale-row {
+    /* -------- 척도 영역 (모바일 최적화) -------- */
+    .scale-row-wrapper {
       margin-top: 18px;
+    }
+
+    .scale-row-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-bottom: 6px;
+      padding: 0 4px;
+    }
+
+    .scale-row {
       display: flex;
       flex-wrap: nowrap;
       justify-content: space-between;
       gap: 4px;
       overflow-x: hidden;
-      padding-bottom: 0;
     }
 
     .scale-btn {
@@ -190,8 +200,7 @@
       border-radius: 999px;
       border: 1px solid #d1d5db;
       background: #ffffff;
-      font-size: 0.72rem;
-      padding: 4px 2px;
+      padding: 4px 2px 6px;
       cursor: pointer;
       display: inline-flex;
       flex-direction: column;
@@ -207,17 +216,19 @@
       background: #eff6ff;
     }
     .scale-value-tag {
-      font-size: 0.75rem;
-      padding: 2px 6px;
-      border-radius: 999px;
-      background: #e5e7eb;
-      color: #374151;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .scale-side-tag {
+      font-size: 0.7rem;
+      color: #6b7280;
+      line-height: 1.1;
     }
 
     .key-hint {
-      margin-top: 10px;
+      margin-top: 8px;
       text-align: center;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #4b5563;
     }
 
@@ -237,7 +248,8 @@
         order: -1;
         margin: 0 auto 8px auto;
       }
-      .choice-card { min-height: 180px; }
+      .choice-card { min-height: 160px; }
+      .img-wrapper { max-width: 100%; }
     }
   </style>
 </head>
@@ -254,7 +266,7 @@
       <u>선호 강도(7,5,3,1 척도)와 반응시간</u>으로 알아보기 위한 조사입니다.
     </p>
     <p class="small">
-      실험이 끝나면 결과는 자동으로 연구자의 구글 시트로 전송되며,<br/>
+      실험이 끝나면 결과는 자동으로 연구자의 구글 시트에 전송되며,<br/>
       참가자는 별도의 파일을 보내지 않아도 됩니다.
     </p>
 
@@ -276,9 +288,7 @@
       그리고 <b>얼마나 더 그런지(7,5,3,1)</b>를 아래 버튼 중 하나로 선택해주세요.
     </p>
     <p class="small">
-      척도 안내 예시:<br/>
-      7 = 매우 강하게 우세, 5 = 강하게 우세,<br/>
-      3 = 비교적 우세, 1 = 두 랜드마크가 거의 비슷함
+      7 = 매우 강함, 5 = 강함, 3 = 비교적 강함, 1 = 두 곳이 비슷함
     </p>
     <button id="attr-block-start-btn">이 기준으로 시작</button>
   </div>
@@ -320,41 +330,48 @@
       </div>
     </div>
 
-    <div class="scale-row">
-      <button class="scale-btn" data-side="left" data-scale="7">
-        <span class="scale-value-tag">7</span>
-        왼쪽 매우 강하게 우세
-      </button>
-      <button class="scale-btn" data-side="left" data-scale="5">
-        <span class="scale-value-tag">5</span>
-        왼쪽 강하게 우세
-      </button>
-      <button class="scale-btn" data-side="left" data-scale="3">
-        <span class="scale-value-tag">3</span>
-        왼쪽 비교적 우세
-      </button>
+    <div class="scale-row-wrapper">
+      <div class="scale-row-labels">
+        <span>왼쪽이 더 그렇다</span>
+        <span>두 곳 비슷</span>
+        <span>오른쪽이 더 그렇다</span>
+      </div>
+      <div class="scale-row">
+        <button class="scale-btn" data-side="left" data-scale="7">
+          <span class="scale-value-tag">7</span>
+          <span class="scale-side-tag">왼쪽<br>매우 강함</span>
+        </button>
+        <button class="scale-btn" data-side="left" data-scale="5">
+          <span class="scale-value-tag">5</span>
+          <span class="scale-side-tag">왼쪽<br>강함</span>
+        </button>
+        <button class="scale-btn" data-side="left" data-scale="3">
+          <span class="scale-value-tag">3</span>
+          <span class="scale-side-tag">왼쪽<br>비교적</span>
+        </button>
 
-      <button class="scale-btn" data-side="equal" data-scale="1">
-        <span class="scale-value-tag">1</span>
-        두 랜드마크 비슷
-      </button>
+        <button class="scale-btn" data-side="equal" data-scale="1">
+          <span class="scale-value-tag">1</span>
+          <span class="scale-side-tag">두 곳<br>비슷함</span>
+        </button>
 
-      <button class="scale-btn" data-side="right" data-scale="3">
-        <span class="scale-value-tag">3</span>
-        오른쪽 비교적 우세
-      </button>
-      <button class="scale-btn" data-side="right" data-scale="5">
-        <span class="scale-value-tag">5</span>
-        오른쪽 강하게 우세
-      </button>
-      <button class="scale-btn" data-side="right" data-scale="7">
-        <span class="scale-value-tag">7</span>
-        오른쪽 매우 강하게 우세
-      </button>
+        <button class="scale-btn" data-side="right" data-scale="3">
+          <span class="scale-value-tag">3</span>
+          <span class="scale-side-tag">오른쪽<br>비교적</span>
+        </button>
+        <button class="scale-btn" data-side="right" data-scale="5">
+          <span class="scale-value-tag">5</span>
+          <span class="scale-side-tag">오른쪽<br>강함</span>
+        </button>
+        <button class="scale-btn" data-side="right" data-scale="7">
+          <span class="scale-value-tag">7</span>
+          <span class="scale-side-tag">오른쪽<br>매우 강함</span>
+        </button>
+      </div>
     </div>
 
     <div class="key-hint">
-      <span class="small">각 비교마다 위의 7·5·3·1·3·5·7 버튼 중 하나만 직관적으로 선택해 주세요.</span>
+      각 비교마다 위의 <b>7·5·3·1·3·5·7</b> 버튼 중 <b>하나만</b> 골라 주세요.
     </div>
   </div>
 
@@ -376,33 +393,33 @@
 </div>
 
 <script>
-  // ★★★ 네가 준 Apps Script 웹앱 URL 그대로 넣어둠 ★★★
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyAnnmkwWZnOBJiJrUAgWk7BGPia2XgjDMdWMhwZej8JxZFPYfP4m2Z2R5wWMHcsD1-A/exec";
+  // 구글 Apps Script 웹앱 URL
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyABvEDQJlzk26NIZKWYj9ckE-i0xWXQVjGYNkVzyikA8JeNgVAxptwwq9HrDrxY1-kzA/exec";
 
   const attributes = [
     {
       id: "history",
       label: "역사성",
       question: "역사성(오랜 역사와 전통)을 기준으로 볼 때,",
-      desc: "얼마나 오래되었고 역사적 의미가 있는가"
+      desc: "얼마나 오래되었고 역사적 의미를 지니는지에 초점을 맞춰 판단해주세요."
     },
     {
       id: "culture",
       label: "문화성",
       question: "문화성(문화·예술·체험 요소)을 기준으로 볼 때,",
-      desc: "문화·예술·체험 공간으로서의 느낌"
+      desc: "문화·예술·체험 활동과 얼마나 잘 연결되는지 기준으로 판단해주세요."
     },
     {
       id: "symbol",
       label: "상징성 · 인지도",
-      question: "상징성·인지도(서울을 대표하는 상징성)를 기준으로 볼 때,",
-      desc: "서울 하면 가장 먼저 떠오르는 장소인가?"
+      question: "상징성·인지도(서울을 대표하는 아이콘)를 기준으로 볼 때,",
+      desc: "‘서울 하면 떠오르는 대표 이미지인가’를 기준으로 판단해주세요."
     },
     {
       id: "modernity",
       label: "현대성 · 건축미",
       question: "현대성·건축미(현대적 이미지와 디자인)를 기준으로 볼 때,",
-      desc: "얼마나 현대적이고 시각적으로 세련되게 보이는가"
+      desc: "얼마나 현대적이고 세련된 건축·디자인 느낌인지 기준으로 판단해주세요."
     }
   ];
 
@@ -521,10 +538,8 @@
     participantId = id;
 
     preloadAlternativeImages();
-
     currentAttrIndex = -1;
     results = [];
-
     goToNextAttributeBlock();
   });
 
@@ -688,7 +703,7 @@
     return Math.round(sum / subset.length);
   }
 
-  // ------- Google Sheet 업로드 (no-cors 모드) -------
+  // Google Sheet 업로드 (no-cors)
   async function uploadResultsToGoogle() {
     if (!results.length || !GOOGLE_SCRIPT_URL) {
       uploadStatus.textContent =
@@ -714,7 +729,7 @@
     }
   }
 
-  // ------- CSV 백업 다운로드 -------
+  // CSV 백업 다운로드
   function downloadCSV() {
     if (!results.length) {
       alert("저장할 데이터가 없습니다.");
