@@ -311,14 +311,7 @@
   <div id="attr-block-intro" class="card hidden">
     <h2 id="attr-block-title"></h2>
     <p class="small" id="attr-block-desc"></p>
-    <p class="small">
-      이 기준만 생각하면서,<br/>
-      각 화면에서 <b>둘 중 어느 랜드마크가 더 그 기준에 잘 맞는지,</b><br/>
-      그리고 <b>얼마나 더 그런지(7,5,3,1)</b>를 아래 버튼 중 하나로 선택해주세요.
-    </p>
-    <p class="small">
-      7 = 매우 강함, 5 = 강함, 3 = 비교적 강함, 1 = 두 곳이 비슷함
-    </p>
+   
     <button id="attr-block-start-btn">이 기준으로 시작</button>
   </div>
 
@@ -405,7 +398,7 @@
     {
       id: "history",
       label: "역사성",
-      question: "역사성(오랜 역사와 전통)을 기준으로 볼 때,",
+      question: "역사성(오랜 역사 · 역사적 의미 · 전통)을 기준으로 볼 때,",
       desc: "얼마나 오래되었고 역사적 의미를 지니는지에 초점을 맞춰 판단해주세요."
     },
     {
@@ -417,13 +410,13 @@
     {
       id: "symbol",
       label: "상징성 · 인지도",
-      question: "상징성·인지도(서울을 대표하는 아이콘)를 기준으로 볼 때,",
+      question: "상징성·인지도(서울 하면 떠오르는 대표 이미지)를 기준으로 볼 때,",
       desc: "‘서울 하면 떠오르는 대표 이미지인가’를 기준으로 판단해주세요."
     },
     {
       id: "modernity",
       label: "현대성 · 건축미",
-      question: "현대성·건축미(현대적 이미지와 디자인)를 기준으로 볼 때,",
+      question: "현대성·건축미(현대적·세련된)를 기준으로 볼 때,",
       desc: "얼마나 현대적이고 세련된 건축·디자인 느낌인지 기준으로 판단해주세요."
     }
   ];
@@ -432,25 +425,25 @@
     {
       id: "gyeongbokgung",
       name: "경복궁",
-      desc: "조선왕조의 법궁으로, 서울의 대표적인 전통 궁궐과 역사 유산",
+      desc: "",
       img: "img/gyeongbokgung.jpg"
     },
     {
       id: "namsan",
       name: "남산타워(N서울타워)",
-      desc: "서울 전경과 야경을 한눈에 볼 수 있는 서울의 대표 전망 타워",
+      desc: "",
       img: "img/namsan.jpg"
     },
     {
       id: "ddp",
       name: "DDP(동대문디자인플라자)",
-      desc: "미래지향적 곡선 디자인의 현대적 건축물, 전시·문화 행사가 열리는 공간",
+      desc: "",
       img: "img/ddp.jpg"
     },
     {
       id: "lotte",
       name: "롯데월드타워",
-      desc: "123층 초고층 빌딩으로, 서울의 현대적 스카이라인을 대표하는 랜드마크",
+      desc: "",
       img: "img/lotte.jpg"
     }
   ];
@@ -594,7 +587,7 @@
     progressInner.style.width = progress.toFixed(1) + "%";
 
     trialQuestion.textContent =
-      `${attr.question} 두 랜드마크 중 어느 쪽이 더 그 기준에 잘 맞는지, 그리고 그 차이는 어느 정도인가요?`;
+      `${attr.question} 두 랜드마크 중 기준에 더 잘 맞는 곳과 그 정도를 선택해 주세요`;
 
     leftLabel.textContent = trial.left.name;
     leftDesc.textContent = trial.left.desc;
