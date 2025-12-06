@@ -186,7 +186,7 @@
       overflow-x: hidden;
     }
 
-    .scale-btn {
+        .scale-btn {
       flex: 1 1 0;
       min-width: 0;
       border-radius: 999px;
@@ -200,11 +200,16 @@
       text-align: center;
       font-size: 0.95rem;
       font-weight: 700;
+      color: #111827;        /* ← 숫자 항상 보이게 */
     }
     .scale-btn:hover {
       border-color: #2563eb;
       box-shadow: 0 4px 14px rgba(37,99,235,0.25);
       background: #eff6ff;
+    }
+    .scale-btn:active {
+      background: #2563eb;
+      color: #ffffff;        /* ← 눌렀을 때만 흰색 숫자 + 파란 배경 */
     }
 
     .scale-caption {
@@ -349,7 +354,7 @@
         <button class="scale-btn" data-side="right" data-scale="7">7</button>
       </div>
       <div class="scale-caption">
-        왼쪽 매우 강함(7) · 왼쪽 강함(5) · 왼쪽 비교적(3) · 비슷함(1) · 오른쪽 비교적(3) · 오른쪽 강함(5) · 오른쪽 매우 강함(7)
+        매우 강함(7) · 강함(5) · 비교적(3) · 비슷함(1) · 비교적(3) · 강함(5) · 매우 강함(7)
       </div>
     </div>
 
