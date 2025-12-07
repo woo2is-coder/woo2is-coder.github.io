@@ -115,7 +115,7 @@
     transition: width 0.2s ease;
   }
 
-  /* ----- 랜드마크 카드 + 속성 동그라미 ----- */
+  /* ----- 랜드마크 / 속성 카드 + 속성 동그라미 ----- */
   #trial-question {
     margin-top: 14px;
     font-size: 0.95rem;
@@ -183,6 +183,15 @@
     font-weight: 700;
     font-size: 0.9rem;
     color: #0ea5e9;
+  }
+
+  /* 속성 중요도 단계에서는 이미지 숨기기 */
+  body.phase-importance .img-wrapper {
+    display: none;
+  }
+  body.phase-importance .choice-card {
+    min-height: 120px;
+    padding-top: 16px;
   }
 
   /* ----- 척도 영역 ----- */
@@ -295,6 +304,10 @@
       <u>선호 강도(7·5·3·1 척도)와 반응시간</u>으로 알아보기 위한 조사입니다.
     </p>
     <p class="small">
+      먼저 네 가지 기준(속성) 사이의 <b>중요도 비교</b>를 진행한 뒤,<br/>
+      각 기준별로 랜드마크를 비교하게 됩니다.
+    </p>
+    <p class="small">
       실험이 끝나면 결과는 자동으로 연구자의 구글 시트에 전송되며,<br/>
       참가자는 별도의 파일을 보내지 않아도 됩니다.
     </p>
@@ -307,15 +320,27 @@
     <button id="start-btn">시작하기</button>
   </div>
 
-  <!-- 속성 블록 안내 화면 -->
+  <!-- 1단계: 속성 중요도 비교 안내 -->
+  <div id="importance-intro" class="card hidden">
+    <h2>1단계: 기준(속성) 중요도 비교</h2>
+    <p class="small">
+      먼저, 서울 랜드마크를 떠올릴 때 <b>어떤 기준(속성)을 더 중요하게 생각하는지</b>를 비교합니다.
+    </p>
+    <p class="small">
+      각 화면마다 두 기준(예: 역사성 vs 현대성)이 제시되며,<br/>
+      더 중요하다고 느끼는 쪽과 그 정도를 <b>7·5·3·1·3·5·7</b> 중 하나로 선택해 주세요.
+    </p>
+    <button id="importance-start-btn">기준 중요도 비교 시작하기</button>
+  </div>
+
+  <!-- 2단계: 속성별 랜드마크 비교 전 안내 화면 -->
   <div id="attr-block-intro" class="card hidden">
     <h2 id="attr-block-title"></h2>
     <p class="small" id="attr-block-desc"></p>
-   
     <button id="attr-block-start-btn">이 기준으로 시작</button>
   </div>
 
-  <!-- 메인 비교 화면 -->
+  <!-- 메인 비교 화면 (속성 중요도 + 랜드마크 비교에서 공통 사용) -->
   <div id="trial-screen" class="card hidden">
     <div class="trial-header">
       <div>
@@ -333,7 +358,7 @@
     <div class="choice-layout">
       <div id="left-card" class="choice-card">
         <div class="img-wrapper">
-          <img id="left-img" src="" alt="왼쪽 랜드마크 이미지" />
+          <img id="left-img" src="" alt="왼쪽 이미지" />
         </div>
         <div class="choice-label" id="left-label"></div>
         <div class="choice-desc" id="left-desc"></div>
@@ -345,7 +370,7 @@
 
       <div id="right-card" class="choice-card">
         <div class="img-wrapper">
-          <img id="right-img" src="" alt="오른쪽 랜드마크 이미지" />
+          <img id="right-img" src="" alt="오른쪽 이미지" />
         </div>
         <div class="choice-label" id="right-label"></div>
         <div class="choice-desc" id="right-desc"></div>
@@ -364,7 +389,7 @@
         <button class="scale-btn" data-side="right" data-scale="7">7</button>
       </div>
       <div class="scale-caption">
-        매우 강함(7) · 강함(5) · 비교적(3) · 비슷함(1) · 비교적(3) · 강함(5) · 매우 강함(7)
+        왼쪽 매우 강함(7) · 왼쪽 강함(5) · 왼쪽 비교적(3) · 비슷함(1) · 오른쪽 비교적(3) · 오른쪽 강함(5) · 오른쪽 매우 강함(7)
       </div>
     </div>
 
@@ -394,6 +419,7 @@
   // ★ 네 Apps Script 웹앱 URL ★
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyAnnmkwWZnOBJiJrUAgWk7BGPia2XgjDMdWMhwZej8JxZFPYfP4m2Z2R5wWMHcsD1-A/exec";
 
+  // 4개 기준(속성) 정의
   const attributes = [
     {
       id: "history",
@@ -421,6 +447,7 @@
     }
   ];
 
+  // 랜드마크(대안)
   const alternatives = [
     {
       id: "gyeongbokgung",
@@ -449,20 +476,34 @@
   ];
 
   let participantId = "";
-  let currentAttrIndex = -1;
-  let currentAttrTrials = [];
-  let currentTrialIndex = -1;
+
+  // 현재 단계: "importance" (속성 중요도) / "attribute" (속성별 랜드마크 비교)
+  let currentPhase = "importance";
+
+  // 1단계: 속성 중요도 비교용
+  let importanceTrials = [];
+  let currentImportanceIndex = -1;
+
+  // 2단계: 속성별 랜드마크 비교용
+  let currentAttrIndex = -1;      // attributes에서 몇 번째 속성인지
+  let currentAttrTrials = [];     // 해당 속성에서의 랜드마크 페어 목록
+  let currentTrialIndex = -1;     // 그 속성 안에서 몇 번째 trial인지
+
   let stimulusOnsetTime = null;
   let awaitingResponse = false;
   let results = [];
 
+  // DOM 참조
   const startScreen = document.getElementById("start-screen");
+  const importanceIntro = document.getElementById("importance-intro");
   const attrBlockIntro = document.getElementById("attr-block-intro");
   const trialScreen = document.getElementById("trial-screen");
   const endScreen = document.getElementById("end-screen");
 
   const startBtn = document.getElementById("start-btn");
   const participantInput = document.getElementById("participant-id");
+
+  const importanceStartBtn = document.getElementById("importance-start-btn");
 
   const attrBlockTitle = document.getElementById("attr-block-title");
   const attrBlockDesc = document.getElementById("attr-block-desc");
@@ -488,7 +529,7 @@
   const uploadStatus = document.getElementById("upload-status");
 
   function showScreen(screen) {
-    [startScreen, attrBlockIntro, trialScreen, endScreen].forEach(el => el.classList.add("hidden"));
+    [startScreen, importanceIntro, attrBlockIntro, trialScreen, endScreen].forEach(el => el.classList.add("hidden"));
     screen.classList.remove("hidden");
   }
 
@@ -501,6 +542,26 @@
     return arr;
   }
 
+  // 속성 중요도 비교용 페어(4개 기준 → 6페어)
+  function generateAttributePairs() {
+    const pairs = [];
+    for (let i = 0; i < attributes.length; i++) {
+      for (let j = i + 1; j < attributes.length; j++) {
+        pairs.push({ a: attributes[i], b: attributes[j] });
+      }
+    }
+    // left/right 랜덤 위치
+    const trials = pairs.map(pair => {
+      if (Math.random() < 0.5) {
+        return { left: pair.a, right: pair.b };
+      } else {
+        return { left: pair.b, right: pair.a };
+      }
+    });
+    return shuffle(trials);
+  }
+
+  // 랜드마크 페어(4개 → 6페어)
   function generateAlternativePairs() {
     const pairs = [];
     for (let i = 0; i < alternatives.length; i++) {
@@ -527,6 +588,7 @@
     });
   }
 
+  // 시작 버튼
   startBtn.addEventListener("click", () => {
     const id = participantInput.value.trim();
     if (!id) {
@@ -536,11 +598,70 @@
     participantId = id;
 
     preloadAlternativeImages();
-    currentAttrIndex = -1;
-    results = [];
-    goToNextAttributeBlock();
+
+    // 1단계: 속성 중요도 비교부터 시작
+    currentPhase = "importance";
+    importanceTrials = generateAttributePairs();
+    currentImportanceIndex = -1;
+    showScreen(importanceIntro);
   });
 
+  // 1단계 시작
+  importanceStartBtn.addEventListener("click", () => {
+    currentPhase = "importance";
+    document.body.classList.add("phase-importance");
+    currentImportanceIndex = -1;
+    startNextImportanceTrial();
+  });
+
+  // 1단계: 속성 중요도 trial 진행
+  function startNextImportanceTrial() {
+    awaitingResponse = false;
+    stimulusOnsetTime = null;
+
+    currentImportanceIndex++;
+    const total = importanceTrials.length;
+
+    if (currentImportanceIndex >= total) {
+      // 1단계 끝 → 2단계(속성별 랜드마크 비교)로 이동
+      document.body.classList.remove("phase-importance");
+      currentAttrIndex = -1;
+      goToNextAttributeBlock();
+      return;
+    }
+
+    const trial = importanceTrials[currentImportanceIndex];
+
+    currentAttrLabelPill.textContent = "1단계: 기준 중요도 비교";
+    attrCircleLabel.textContent = "중요도";
+
+    const trialNum = currentImportanceIndex + 1;
+    trialCounter.textContent = `기준 중요도 Trial ${trialNum} / ${total}`;
+
+    const progress = (trialNum / total) * 100;
+    progressInner.style.width = progress.toFixed(1) + "%";
+
+    trialQuestion.textContent =
+      "두 기준 중 서울 랜드마크를 떠올릴 때 더 중요하다고 느끼는 쪽과 그 정도를 선택해 주세요.";
+
+    // 속성 텍스트만 사용 (이미지는 숨겨둔 상태)
+    leftLabel.textContent = trial.left.label;
+    leftDesc.textContent = trial.left.desc;
+    leftImg.src = "";
+
+    rightLabel.textContent = trial.right.label;
+    rightDesc.textContent = trial.right.desc;
+    rightImg.src = "";
+
+    showScreen(trialScreen);
+
+    setTimeout(() => {
+      stimulusOnsetTime = performance.now();
+      awaitingResponse = true;
+    }, 200);
+  }
+
+  // 2단계: 속성별 랜드마크 비교 안내 화면으로 이동
   function goToNextAttributeBlock() {
     currentAttrIndex++;
     if (currentAttrIndex >= attributes.length) {
@@ -549,7 +670,7 @@
     }
 
     const attr = attributes[currentAttrIndex];
-    attrBlockTitle.textContent = `기준: ${attr.label}`;
+    attrBlockTitle.textContent = `2단계: 기준 "${attr.label}" 기준 비교`;
     attrBlockDesc.textContent =
       `이제부터는 "${attr.label}" 기준으로 서울 랜드마크를 비교합니다.\n` +
       `(예: ${attr.desc})`;
@@ -557,13 +678,17 @@
     showScreen(attrBlockIntro);
   }
 
+  // 2단계: 해당 기준에서 랜드마크 비교 시작
   attrBlockStartBtn.addEventListener("click", () => {
+    currentPhase = "attribute";
+    document.body.classList.remove("phase-importance");
     currentAttrTrials = generateAlternativePairs();
     currentTrialIndex = -1;
-    startNextTrial();
+    startNextAttributeTrial();
   });
 
-  function startNextTrial() {
+  // 2단계: 속성별 랜드마크 trial 진행
+  function startNextAttributeTrial() {
     awaitingResponse = false;
     stimulusOnsetTime = null;
 
@@ -576,7 +701,7 @@
     const attr = attributes[currentAttrIndex];
     const trial = currentAttrTrials[currentTrialIndex];
 
-    currentAttrLabelPill.textContent = `기준: ${attr.label}`;
+    currentAttrLabelPill.textContent = `2단계: 기준 ${attr.label}`;
     attrCircleLabel.textContent = attr.label;
 
     const trialNum = currentTrialIndex + 1;
@@ -587,7 +712,7 @@
     progressInner.style.width = progress.toFixed(1) + "%";
 
     trialQuestion.textContent =
-      `${attr.question} 두 랜드마크 중 기준에 더 잘 맞는 곳과 그 정도를 선택해 주세요`;
+      `${attr.question} 두 랜드마크 중 기준에 더 잘 맞는 곳과 그 정도를 선택해 주세요.`;
 
     leftLabel.textContent = trial.left.name;
     leftDesc.textContent = trial.left.desc;
@@ -605,6 +730,7 @@
     }, 200);
   }
 
+  // 척도 버튼 공통 처리
   scaleButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       const side = btn.getAttribute("data-side");
@@ -620,6 +746,59 @@
     const rt = stimulusOnsetTime ? Math.round(now - stimulusOnsetTime) : null;
     awaitingResponse = false;
 
+    let record = null;
+
+    if (currentPhase === "importance") {
+      // 1단계: 속성 중요도 비교
+      const trial = importanceTrials[currentImportanceIndex];
+      const attrMeta = { id: "importance", label: "속성중요도" };
+
+      let chosen = null;
+      let other = null;
+      let signedScore = 0;
+      const chosen_side = side;
+
+      if (side === "left") {
+        chosen = trial.left;
+        other = trial.right;
+        signedScore = scaleValue;
+      } else if (side === "right") {
+        chosen = trial.right;
+        other = trial.left;
+        signedScore = -scaleValue;
+      } else {
+        signedScore = 0;
+      }
+
+      record = {
+        participant_id: participantId,
+        attribute_id: attrMeta.id,
+        attribute_label: attrMeta.label,
+        attribute_index: -1,
+        trial_index_within_attr: currentImportanceIndex,
+        global_trial_index: results.length,
+        left_id: trial.left.id,
+        left_name: trial.left.label,
+        right_id: trial.right.id,
+        right_name: trial.right.label,
+        chosen_side: chosen_side,
+        scale_value: scaleValue,
+        signed_score: signedScore,
+        chosen_id: chosen ? chosen.id : "",
+        chosen_name: chosen ? chosen.label : "",
+        other_id: other ? other.id : "",
+        other_name: other ? other.label : "",
+        rt_ms: rt,
+        input_type: inputType,
+        timestamp: new Date().toISOString()
+      };
+
+      results.push(record);
+      setTimeout(() => startNextImportanceTrial(), 150);
+      return;
+    }
+
+    // 2단계: 속성별 랜드마크 비교
     const trial = currentAttrTrials[currentTrialIndex];
     const attr = attributes[currentAttrIndex];
 
@@ -641,15 +820,13 @@
       signedScore = 0;
     }
 
-    const globalTrialIndex = results.length;
-
-    results.push({
+    record = {
       participant_id: participantId,
       attribute_id: attr.id,
       attribute_label: attr.label,
       attribute_index: currentAttrIndex,
       trial_index_within_attr: currentTrialIndex,
-      global_trial_index: globalTrialIndex,
+      global_trial_index: results.length,
       left_id: trial.left.id,
       left_name: trial.left.name,
       right_id: trial.right.id,
@@ -664,9 +841,10 @@
       rt_ms: rt,
       input_type: inputType,
       timestamp: new Date().toISOString()
-    });
+    };
 
-    setTimeout(() => startNextTrial(), 150);
+    results.push(record);
+    setTimeout(() => startNextAttributeTrial(), 150);
   }
 
   function finishExperiment() {
@@ -680,7 +858,7 @@
 
     const totalTrials = results.length;
     const li1 = document.createElement("li");
-    li1.textContent = `전체 trial 수: ${totalTrials} (속성 4개 × 각 6페어)`;
+    li1.textContent = `전체 trial 수: ${totalTrials} (속성 중요도 6페어 + 랜드마크 비교 기준 4개 × 각 6페어)`;
     summaryList.appendChild(li1);
 
     const meanRT = calcMeanRT();
